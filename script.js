@@ -23,12 +23,35 @@ console.log(name, teamName);
 count++;
 console.log('Total check-ins', count);
 
+//Update attendance display
+const attendeeCountDisplay = document.getElementById('attendeeCount');
+attendeeCountDisplay.textContent = count;
+
 //Update progress bar
-const percentage = Math.round((count / maxCount) * 100) + '%';
-console.log(`Progress: ${percentage}`);
+const percentage = Math.round((count / maxCount) * 100);
+const progressBar = document.getElementById('progressBar');
+progressBar.style.width = percentage + '%';
+console.log(`Progress: ${percentage}%`);
 
 //Update team counter
 const teamCounter = document.getElementById(team + "Count");
-console.log(teamCounter);
+teamCounter.textContent = parseInt(teamCounter.textContent) + 1;
 
-})
+//Show welcome message
+const message = `Welcome, ${name} from ${teamName}! Total attendees: ${count}`;
+console.log(message);
+
+//Display feedback message to user
+const greeting = document.getElementById('greeting');
+greeting.textContent = message;
+greeting.style.display = 'block';
+
+form.reset();
+
+//const current = parseInt(teamCounter.textContent);
+//console.log("Previous team count:", current);
+
+//const newTotal = current + 1;
+//console.log("New team count:", newTotal);
+
+});
