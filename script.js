@@ -13,11 +13,17 @@ form.addEventListener('submit', function(event) {
 
 
 //Get form values
-const name = nameInput.value;
+const name = nameInput.value.trim();
 const team = teamSelect.value;
 const teamName = teamSelect.selectedOptions[0].text;
 
-console.log(name, teamName);
+//Validate that name is provided
+if (!name) {
+  alert('Please enter your name before checking in.');
+  return;
+}
+
+console.log(`Checking in: ${name} from ${teamName}`);
 
 //Increment count 
 count++;
@@ -37,14 +43,28 @@ console.log(`Progress: ${percentage}%`);
 const teamCounter = document.getElementById(team + "Count");
 teamCounter.textContent = parseInt(teamCounter.textContent) + 1;
 
-//Show welcome message
-const message = `Welcome, ${name} from ${teamName}! Total attendees: ${count}`;
-console.log(message);
+//Show personalized welcome message
+const welcomeMessages = [
+  `🎉 Welcome to the Sustainability Summit, ${name}!`,
+  `🌱 Great to see you here, ${name}!`,
+  `✨ Welcome aboard, ${name}!`,
+  `🌍 Thanks for joining us, ${name}!`
+];
+const randomWelcome = welcomeMessages[Math.floor(Math.random() * welcomeMessages.length)];
+const fullMessage = `${randomWelcome} You're representing ${teamName} and you're attendee #${count}.`;
 
-//Display feedback message to user
+console.log(fullMessage);
+
+//Display personalized greeting to user
 const greeting = document.getElementById('greeting');
-greeting.textContent = message;
+greeting.innerHTML = `<strong>${fullMessage}</strong>`;
 greeting.style.display = 'block';
+greeting.style.color = '#2563eb';
+greeting.style.padding = '15px';
+greeting.style.borderRadius = '8px';
+greeting.style.backgroundColor = '#eff6ff';
+greeting.style.border = '1px solid #bfdbfe';
+greeting.style.marginBottom = '20px';
 
 form.reset();
 
