@@ -19,11 +19,15 @@ const teamNames = {
   power: 'Team Renewables'
 };
 
+//Track individual attendees
+let attendeeList = [];
+
 //Local Storage Functions
 function saveDataToStorage() {
   const eventData = {
     totalCount: count,
     teams: teamCounts,
+    attendees: attendeeList,
     timestamp: new Date().toISOString()
   };
   localStorage.setItem('sustainabilityEventData', JSON.stringify(eventData));
@@ -44,8 +48,11 @@ function loadDataFromStorage() {
         teamCounts.power = eventData.teams.power || 0;
       }
       
+      //Load attendee list
+      attendeeList = eventData.attendees || [];
+      
       console.log('📂 Data loaded from local storage:', eventData);
-      console.log(`🔄 Restored: Total=${count}, Teams=${JSON.stringify(teamCounts)}`);
+      console.log(`🔄 Restored: Total=${count}, Teams=${JSON.stringify(teamCounts)}, Attendees=${attendeeList.length}`);
       
       //Update display with loaded data
       updateDisplayFromStorage();
@@ -75,6 +82,9 @@ function updateDisplayFromStorage() {
   document.getElementById('zeroCount').textContent = teamCounts.zero;
   document.getElementById('powerCount').textContent = teamCounts.power;
   
+  //Update attendee list display
+  displayAttendeeList();
+  
   //Check if goal was already reached
   if (count >= maxCount) {
     celebrateGoalReached();
@@ -89,6 +99,7 @@ function clearStoredData() {
   teamCounts.water = 0;
   teamCounts.zero = 0;
   teamCounts.power = 0;
+  attendeeList = [];
   updateDisplayFromStorage();
   
   //Re-enable form if it was disabled
@@ -100,6 +111,72 @@ function clearStoredData() {
   greeting.style.display = 'none';
   
   console.log('🗑️ All stored data cleared and display reset');
+}
+
+//Function to display attendee list
+function displayAttendeeList() {
+  //Create or find the attendee list container
+  let attendeeListContainer = document.getElementById('attendeeListContainer');
+  
+  if (!attendeeListContainer) {
+    //Create the container if it doesn't exist
+    attendeeListContainer = document.createElement('div');
+    attendeeListContainer.id = 'attendeeListContainer';
+    attendeeListContainer.innerHTML = `
+      <div class="attendee-list-section">
+        <h3><i class="fas fa-users"></i> Attendee List</h3>
+        <div id="attendeeListContent" class="attendee-list-content">
+          <p class="no-attendees">No attendees yet. Be the first to check in!</p>
+        </div>
+      </div>
+    `;
+    
+    //Insert after team stats
+    const teamStats = document.querySelector('.team-stats');
+    if (teamStats) {
+      teamStats.parentNode.insertBefore(attendeeListContainer, teamStats.nextSibling);
+    }
+  }
+  
+  const listContent = document.getElementById('attendeeListContent');
+  
+  if (attendeeList.length === 0) {
+    listContent.innerHTML = '<p class="no-attendees">No attendees yet. Be the first to check in!</p>';
+    return;
+  }
+  
+  //Group attendees by team
+  const attendeesByTeam = {
+    water: attendeeList.filter(attendee => attendee.team === 'water'),
+    zero: attendeeList.filter(attendee => attendee.team === 'zero'),
+    power: attendeeList.filter(attendee => attendee.team === 'power')
+  };
+  
+  let listHTML = '';
+  
+  //Display each team's attendees
+  for (const team in attendeesByTeam) {
+    if (attendeesByTeam[team].length > 0) {
+      const teamEmoji = team === 'water' ? '🌊' : team === 'zero' ? '🌿' : '⚡';
+      listHTML += `
+        <div class="team-attendee-group">
+          <h4 class="team-attendee-header">${teamEmoji} ${teamNames[team]} (${attendeesByTeam[team].length})</h4>
+          <ul class="attendee-names">
+      `;
+      
+      attendeesByTeam[team].forEach((attendee, index) => {
+        listHTML += `<li class="attendee-item">
+          <span class="attendee-number">#${attendee.checkInNumber}</span>
+          <span class="attendee-name">${attendee.name}</span>
+        </li>`;
+      });
+      
+      listHTML += '</ul></div>';
+    }
+  }
+  
+  listContent.innerHTML = listHTML;
+  console.log('📋 Attendee list updated');
 }
 
 //Load saved data when page loads
@@ -152,6 +229,20 @@ console.log(`${teamNames[team]} now has ${teamCounts[team]} members`);
 //Update team counter display
 const teamCounter = document.getElementById(team + "Count");
 teamCounter.textContent = teamCounts[team];
+
+//Add attendee to the list
+const attendeeData = {
+  name: name,
+  team: team,
+  teamName: teamName,
+  checkInNumber: count,
+  timestamp: new Date().toISOString()
+};
+attendeeList.push(attendeeData);
+console.log(`👤 Added to attendee list: ${name} (${teamName}) - #${count}`);
+
+//Update attendee list display
+displayAttendeeList();
 
 //Save data to local storage after each check-in
 saveDataToStorage();
